@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang='pt-br'><head><meta charset='utf-8'><title>Plano Breve</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f8fb;margin:0}header{background:#fff;padding:10px;text-align:center;box-shadow:0 2px 5px #ccc}
+img{max-height:90px}.wrap{display:flex;gap:20px;padding:20px}.pool,.zones{flex:1}.card{background:#fff;border:2px solid #1b4ea1;padding:8px;margin:6px;border-radius:8px;cursor:grab}.zone{min-height:120px;border:2px dashed #1b4ea1;padding:10px;margin:10px;border-radius:8px}
+.ok{background:#dff5df}.msg{padding:15px;font-weight:bold}
+</style></head><body><header><img src='logo.jpg'><h2>Montando um plano breve de acolhimento</h2></header><div class='wrap'><div class='pool' id='pool'></div><div class='zones'></div></div><div class='msg' id='m'></div>
+<script>
+const data=[
+["Prefere responder com frases curtas, escrita ou apontamento.","Comunicação"],["Responde melhor a perguntas fechadas.","Comunicação"],["Precisa de tempo maior para responder.","Comunicação"],["Sinaliza pausa levantando a mão.","Comunicação"],
+["Piora com sala cheia, ruído e luz intensa.","Ambiente"],["Melhora em local menos movimentado.","Ambiente"],["Não tolera toque sem aviso prévio.","Ambiente"],["Pode usar objeto regulatório seguro durante a espera.","Ambiente"],
+["Explicar o procedimento em etapas antes de iniciar.","Rotina e Procedimentos"],["Oferecer escolha simples: braço direito ou esquerdo; agora ou em dois minutos.","Rotina e Procedimentos"],["Avisar antes de cada transição no atendimento.","Rotina e Procedimentos"],["Combinar pausa breve antes de tentar novamente.","Rotina e Procedimentos"],
+["Registrar gatilhos que pioraram o atendimento.","Segurança e Continuidade"],["Registrar estratégias que funcionaram.","Segurança e Continuidade"],["Atualizar o plano após crise ou mudança importante.","Segurança e Continuidade"],["Evitar registros como 'difícil', 'agressivo' ou 'não colaborou'.","Segurança e Continuidade"]];
+const zones=["Comunicação","Ambiente","Rotina e Procedimentos","Segurança e Continuidade"];
+let done=0;
+const pool=document.getElementById("pool"),z=document.querySelector(".zones");
+zones.forEach(n=>{let d=document.createElement("div");d.className="zone";d.dataset.name=n;d.innerHTML="<h3>"+n+"</h3>";d.ondragover=e=>e.preventDefault();d.ondrop=drop;z.appendChild(d);});
+data.sort(()=>Math.random()-.5).forEach((it,i)=>{let c=document.createElement("div");c.className="card";c.draggable=true;c.id="c"+i;c.dataset.dest=it[1];c.textContent=it[0];c.ondragstart=e=>e.dataTransfer.setData("id",c.id);pool.appendChild(c);});
+function drop(e){e.preventDefault();let c=document.getElementById(e.dataTransfer.getData("id"));if(c.dataset.dest==this.dataset.name){this.appendChild(c);c.draggable=false;c.classList.add("ok");done++;m.textContent="Muito bem!";if(done==16)m.innerHTML="Muito bem. Você organizou corretamente as informações do plano breve de acolhimento.<br><br>Ao concluir esta atividade, retome a ideia central das Unidades III e IV: o acolhimento individualizado precisa produzir informações úteis para a equipe. Quando preferências, aversões, barreiras, sinais de pausa e estratégias que funcionam são organizados em um plano breve, o cuidado deixa de depender do improviso e passa a ter mais continuidade.";}else{m.textContent="Revise o item e tente novamente. Lembre-se: comunicação indica como falar e obter resposta; ambiente indica o que reduz ou aumenta sobrecarga; rotina e procedimentos indicam como conduzir etapas do atendimento; segurança e continuidade indicam o que registrar e manter para os próximos encontros.";}}
+</script></body></html>

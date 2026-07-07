@@ -1,19 +1,715 @@
-<!DOCTYPE html><html lang='pt-br'><head><meta charset='utf-8'><title>Plano Breve</title>
-<style>
-body{font-family:Arial,sans-serif;background:#f4f8fb;margin:0}header{background:#fff;padding:10px;text-align:center;box-shadow:0 2px 5px #ccc}
-img{max-height:90px}.wrap{display:flex;gap:20px;padding:20px}.pool,.zones{flex:1}.card{background:#fff;border:2px solid #1b4ea1;padding:8px;margin:6px;border-radius:8px;cursor:grab}.zone{min-height:120px;border:2px dashed #1b4ea1;padding:10px;margin:10px;border-radius:8px}
-.ok{background:#dff5df}.msg{padding:15px;font-weight:bold}
-</style></head><body><header><img src='logo.jpg'><h2>Montando um plano breve de acolhimento</h2></header><div class='wrap'><div class='pool' id='pool'></div><div class='zones'></div></div><div class='msg' id='m'></div>
-<script>
-const data=[
-["Prefere responder com frases curtas, escrita ou apontamento.","Comunicação"],["Responde melhor a perguntas fechadas.","Comunicação"],["Precisa de tempo maior para responder.","Comunicação"],["Sinaliza pausa levantando a mão.","Comunicação"],
-["Piora com sala cheia, ruído e luz intensa.","Ambiente"],["Melhora em local menos movimentado.","Ambiente"],["Não tolera toque sem aviso prévio.","Ambiente"],["Pode usar objeto regulatório seguro durante a espera.","Ambiente"],
-["Explicar o procedimento em etapas antes de iniciar.","Rotina e Procedimentos"],["Oferecer escolha simples: braço direito ou esquerdo; agora ou em dois minutos.","Rotina e Procedimentos"],["Avisar antes de cada transição no atendimento.","Rotina e Procedimentos"],["Combinar pausa breve antes de tentar novamente.","Rotina e Procedimentos"],
-["Registrar gatilhos que pioraram o atendimento.","Segurança e Continuidade"],["Registrar estratégias que funcionaram.","Segurança e Continuidade"],["Atualizar o plano após crise ou mudança importante.","Segurança e Continuidade"],["Evitar registros como 'difícil', 'agressivo' ou 'não colaborou'.","Segurança e Continuidade"]];
-const zones=["Comunicação","Ambiente","Rotina e Procedimentos","Segurança e Continuidade"];
-let done=0;
-const pool=document.getElementById("pool"),z=document.querySelector(".zones");
-zones.forEach(n=>{let d=document.createElement("div");d.className="zone";d.dataset.name=n;d.innerHTML="<h3>"+n+"</h3>";d.ondragover=e=>e.preventDefault();d.ondrop=drop;z.appendChild(d);});
-data.sort(()=>Math.random()-.5).forEach((it,i)=>{let c=document.createElement("div");c.className="card";c.draggable=true;c.id="c"+i;c.dataset.dest=it[1];c.textContent=it[0];c.ondragstart=e=>e.dataTransfer.setData("id",c.id);pool.appendChild(c);});
-function drop(e){e.preventDefault();let c=document.getElementById(e.dataTransfer.getData("id"));if(c.dataset.dest==this.dataset.name){this.appendChild(c);c.draggable=false;c.classList.add("ok");done++;m.textContent="Muito bem!";if(done==16)m.innerHTML="Muito bem. Você organizou corretamente as informações do plano breve de acolhimento.<br><br>Ao concluir esta atividade, retome a ideia central das Unidades III e IV: o acolhimento individualizado precisa produzir informações úteis para a equipe. Quando preferências, aversões, barreiras, sinais de pausa e estratégias que funcionam são organizados em um plano breve, o cuidado deixa de depender do improviso e passa a ter mais continuidade.";}else{m.textContent="Revise o item e tente novamente. Lembre-se: comunicação indica como falar e obter resposta; ambiente indica o que reduz ou aumenta sobrecarga; rotina e procedimentos indicam como conduzir etapas do atendimento; segurança e continuidade indicam o que registrar e manter para os próximos encontros.";}}
-</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP/MA - Montando um Plano Breve de Acolhimento</title>
+    <style>
+        :root {
+            --esp-blue-dark: #0A2573;
+            --esp-blue-light: #3296D4;
+            --esp-red: #E24A51;
+            --bg-gray: #F4F6F9;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --success: #2ECC71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            padding-bottom: 40px;
+        }
+
+        /* Topo Institucional */
+        .header-esp {
+            background-color: #ffffff;
+            border-bottom: 4px solid var(--esp-blue-light);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-svg {
+            height: 55px;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-titles h1 {
+            font-size: 16px;
+            color: var(--esp-blue-dark);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-titles p {
+            font-size: 12px;
+            color: var(--esp-red);
+            font-weight: 600;
+        }
+
+        /* Container Principal */
+        .main-container {
+            max-w: 1280px;
+            margin: 25px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Painel Lateral de Status */
+        .sidebar {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            height: fit-content;
+            border: 1px solid #E2E8F0;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            color: var(--esp-blue-dark);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--bg-gray);
+            padding-bottom: 5px;
+        }
+
+        .status-item {
+            margin-bottom: 20px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #7F8C8D;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .status-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--esp-blue-dark);
+        }
+
+        .progress-bar-container {
+            background: #E2E8F0;
+            border-radius: 8px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--esp-blue-light), var(--esp-blue-dark));
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Área de Conteúdo */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .intro-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--esp-blue-dark);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        .intro-box h2 {
+            font-size: 20px;
+            color: var(--esp-blue-dark);
+            margin-bottom: 8px;
+        }
+
+        .intro-box p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Zona de Drop (O Tabuleiro de 4 áreas) */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 650px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .drop-zone {
+            background: #ffffff;
+            border: 2px dashed #CBD5E1;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 180px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--esp-blue-light);
+            background: #F0F7FC;
+            transform: scale(1.01);
+        }
+
+        .zone-title {
+            font-size: 15px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #fff;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .zone-1 .zone-title { background-color: #2B579A; }
+        .zone-2 .zone-title { background-color: #1E7145; }
+        .zone-3 .zone-title { background-color: #D80027; }
+        .zone-4 .zone-title { background-color: #B91D47; }
+
+        /* Itens Arrastáveis */
+        .items-pool {
+            background: #EAEDF1;
+            border: 1px solid #D0D5DD;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .draggable-item {
+            background: var(--card-bg);
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+            max-width: 280px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .draggable-item.selected-for-click {
+            border: 2px solid var(--esp-blue-light);
+            background: #EBF5FB;
+            box-shadow: 0 0 8px rgba(50, 150, 212, 0.4);
+        }
+
+        .draggable-item.correct {
+            background-color: #D4EDDA;
+            border-color: #C3E6CB;
+            color: #155724;
+            cursor: default;
+        }
+
+        /* Feedbacks Popups */
+        .feedback-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .feedback-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .feedback-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .feedback-overlay.active .feedback-box {
+            transform: scale(1);
+        }
+
+        .feedback-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .feedback-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .feedback-text {
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .feedback-btn {
+            background-color: var(--esp-blue-dark);
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .feedback-btn:hover {
+            background-color: var(--esp-blue-light);
+        }
+
+        .btn-restart {
+            width: 100%;
+            background-color: transparent;
+            border: 2px solid var(--esp-blue-dark);
+            color: var(--esp-blue-dark);
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-restart:hover {
+            background-color: var(--esp-blue-dark);
+            color: #fff;
+        }
+
+        /* Efeito de Confetes Simples (CSS puro) */
+        .confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        /* Guia Visual de Alternativa de Clique */
+        .click-notice {
+            text-align: center;
+            font-size: 12px;
+            color: #7F8C8D;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-esp">
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+                <text x="20" y="115" font-family="'Arial Black', Impact, sans-serif" font-size="115" fill="#0A2573" letter-spacing="-4">ES</text>
+                <path d="M 195 105 C 195 45, 275 45, 275 90 C 275 140, 195 120, 195 180 C 195 230, 275 230, 275 180" fill="none" stroke="#0A2573" stroke-width="22" stroke-linecap="round"/>
+                <path d="M 195 145 C 195 110, 275 110, 275 145 C 275 185, 195 170, 195 210 C 195 240, 275 240, 275 210" fill="none" stroke="#3296D4" stroke-width="16" stroke-linecap="round" transform="translate(15, -45) scale(0.9)"/>
+                <text x="310" y="115" font-family="'Arial Black', Impact, sans-serif" font-size="115" fill="#0A2573" letter-spacing="-4">MA</text>
+                <text x="320" y="140" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#E24A51">Escola de Saúde Pública</text>
+                <text x="320" y="165" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#E24A51">do Estado do Maranhão</text>
+            </svg>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <h3>Progresso</h3>
+            <div class="status-item">
+                <div class="flex-row" style="display:flex; justify-content:space-between;">
+                    <span class="status-label">Concluído</span>
+                    <span id="progress-percent" style="font-size:12px; font-weight:bold; color:var(--esp-blue-dark)">0%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <span class="status-label">Acertos</span>
+                <div id="score-counter" class="status-value">0 / 16</div>
+            </div>
+
+            <div class="status-item">
+                <span class="status-label">Tempo Decorrido</span>
+                <div id="timer-counter" class="status-value">00:00</div>
+            </div>
+
+            <button class="btn-restart" onclick="restartActivity()">Reiniciar Atividade</button>
+        </aside>
+
+        <main class="content-area">
+            <div class="intro-box">
+                <h2>Montando um Plano Breve de Acolhimento</h2>
+                <p>Verifique se você consegue organizar adequadamente as informações coletadas no acolhimento individualizado. Organize os cards nos seus respectivos campos funcionais.</p>
+            </div>
+
+            <p class="click-notice">💡 <strong>Dica de Acessibilidade:</strong> Você pode arrastar os cartões ou simplesmente clicar/tocar no cartão e depois clicar na zona de destino desejada.</p>
+
+            <div id="items-pool" class="items-pool">
+                </div>
+
+            <div class="board">
+                <div class="drop-zone zone-1" data-zone="Comunicação">
+                    <div class="zone-title">1. Comunicação</div>
+                </div>
+                <div class="drop-zone zone-2" data-zone="Ambiente">
+                    <div class="zone-title">2. Ambiente</div>
+                </div>
+                <div class="drop-zone zone-3" data-zone="Rotina e Procedimentos">
+                    <div class="zone-title">3. Rotina e Procedimentos</div>
+                </div>
+                <div class="drop-zone zone-4" data-zone="Segurança e Continuidade">
+                    <div class="zone-title">4. Segurança e Continuidade</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="feedback-overlay" class="feedback-overlay">
+        <div class="feedback-box">
+            <div id="fb-icon" class="feedback-icon"></div>
+            <div id="fb-title" class="feedback-title"></div>
+            <div id="fb-text" class="feedback-text"></div>
+            <button class="feedback-btn" onclick="closeFeedback()">Continuar</button>
+        </div>
+    </div>
+
+    <canvas id="confetti" class="confetti-canvas"></canvas>
+
+    <script>
+        // Banco de Dados das Atividades (Consolidado)
+        const rawItems = [
+            { id: "1", text: "Prefere responder com frases curtas, escrita ou apontamento.", category: "Comunicação" },
+            { id: "2", text: "Responde melhor a perguntas fechadas.", category: "Comunicação" },
+            { id: "3", text: "Precisa de tempo maior para responder.", category: "Comunicação" },
+            { id: "4", text: "Sinaliza pausa levantando a mão.", category: "Comunicação" },
+            { id: "5", text: "Piora com sala cheia, ruído e luz intensa.", category: "Ambiente" },
+            { id: "6", text: "Melhora em local menos movimentado.", category: "Ambiente" },
+            { id: "7", text: "Não tolera toque sem aviso prévio.", category: "Ambiente" },
+            { id: "8", text: "Pode usar objeto regulatório seguro durante a espera.", category: "Ambiente" },
+            { id: "9", text: "Explicar o procedimento em etapas antes de iniciar.", category: "Rotina e Procedimentos" },
+            { id: "10", text: "Oferecer escolha simples: braço direito ou esquerdo; agora ou em dois minutos.", category: "Rotina e Procedimentos" },
+            { id: "11", text: "Avisar antes de cada transição no atendimento.", category: "Rotina e Procedimentos" },
+            { id: "12", text: "Combinar pausa breve antes de tentar novamente.", category: "Rotina e Procedimentos" },
+            { id: "13", text: "Registrar gatilhos que pioraram o atendimento.", category: "Segurança e Continuidade" },
+            { id: "14", text: "Registrar estratégias que funcionaram.", category: "Segurança e Continuidade" },
+            { id: "15", text: "Atualizar o plano após crise ou mudança importante.", category: "Segurança e Continuidade" },
+            { id: "16", text: "Evitar registros como 'difícil', 'agressivo' ou 'não colaborou'.", category: "Segurança e Continuidade" }
+        ];
+
+        let selectedItemForClick = null;
+        let correctCount = 0;
+        let totalItems = rawItems.length;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        // Inicializador do Sistema
+        function init() {
+            renderPool();
+            setupDragAndDrop();
+            setupClickAlternative();
+            startTimer();
+            updateStats();
+        }
+
+        // Embaralhamento (Fisher-Yates)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Renderização dos Itens Embaralhados
+        function renderPool() {
+            const pool = document.getElementById('items-pool');
+            pool.innerHTML = '';
+            const shuffled = shuffle([...rawItems]);
+            
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'draggable-item';
+                div.draggable = true;
+                div.id = `item-${item.id}`;
+                div.innerText = item.text;
+                div.setAttribute('data-category', item.category);
+                pool.appendChild(div);
+            });
+        }
+
+        // Lógica de Tempo
+        function startTimer() {
+            clearInterval(timerInterval);
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timer-counter').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Atualização de Contadores Visuais
+        function updateStats() {
+            document.getElementById('score-counter').innerText = `${correctCount} / ${totalItems}`;
+            const percentage = Math.round((correctCount / totalItems) * 100);
+            document.getElementById('progress-percent').innerText = `${percentage}%`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Configuração Drag and Drop Nativo
+        function setupDragAndDrop() {
+            const zones = document.querySelectorAll('.drop-zone');
+            
+            document.getElementById('items-pool').addEventListener('dragstart', (e) => {
+                if(e.target.classList.contains('draggable-item') && !e.target.classList.contains('correct')) {
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                    if(selectedItemForClick) {
+                        selectedItemForClick.classList.remove('selected-for-click');
+                        selectedItemForClick = null;
+                    }
+                }
+            });
+
+            zones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if(!zone.classList.contains('drag-over')) zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const id = e.dataTransfer.getData('text/plain');
+                    const item = document.getElementById(id);
+                    if(item) evaluateDrop(item, zone);
+                });
+            });
+        }
+
+        // Configuração para Acessibilidade / Dispositivos Móveis (Clique Alternativo)
+        function setupClickAlternative() {
+            document.getElementById('items-pool').addEventListener('click', (e) => {
+                const target = e.target.closest('.draggable-item');
+                if(!target || target.classList.contains('correct')) return;
+
+                if(selectedItemForClick) {
+                    selectedItemForClick.classList.remove('selected-for-click');
+                }
+
+                if(selectedItemForClick === target) {
+                    selectedItemForClick = null;
+                } else {
+                    selectedItemForClick = target;
+                    target.classList.add('selected-for-click');
+                }
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('click', () => {
+                    if(selectedItemForClick) {
+                        evaluateDrop(selectedItemForClick, zone);
+                        selectedItemForClick.classList.remove('selected-for-click');
+                        selectedItemForClick = null;
+                    }
+                });
+            });
+        }
+
+        // Avaliação do Acerto ou Erro
+        function evaluateDrop(item, zone) {
+            const itemCategory = item.getAttribute('data-category');
+            const zoneCategory = zone.getAttribute('data-zone');
+
+            if(itemCategory === zoneCategory) {
+                // Remove propriedades de arrastar e consolida acerto
+                item.removeAttribute('draggable');
+                item.classList.add('correct');
+                item.classList.remove('selected-for-click');
+                zone.appendChild(item);
+                correctCount++;
+                updateStats();
+                
+                triggerFeedback(true, "Muito bem!", "Você organizou corretamente as informações do plano breve de acolhimento. Esse tipo de registro ajuda a equipe a agir com mais previsibilidade, segurança e continuidade.");
+            } else {
+                triggerFeedback(false, "Revise o item e tente novamente.", "Lembre-se: <strong>Comunicação</strong> indica como falar e obter resposta; <strong>Ambiente</strong> indica o que reduz ou aumenta sobrecarga; <strong>Rotina e Procedimentos</strong> indicam como conduzir etapas do atendimento; <strong>Segurança e Continuidade</strong> indicam o que registrar e manter para os próximos encontros.");
+            }
+        }
+
+        // Controle dos Popups de Feedback
+        function triggerFeedback(isCorrect, title, message) {
+            // Se concluiu tudo, intercepta para a mensagem final estendida
+            if(correctCount === totalItems && isCorrect) {
+                clearInterval(timerInterval);
+                setTimeout(() => {
+                    showFinalScreen();
+                }, 400);
+                return;
+            }
+
+            const overlay = document.getElementById('feedback-overlay');
+            document.getElementById('fb-icon').innerHTML = isCorrect ? "✅" : "❌";
+            document.getElementById('fb-title').innerText = title;
+            document.getElementById('fb-text').innerHTML = message;
+            overlay.classList.add('active');
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedback-overlay').classList.remove('active');
+        }
+
+        // Tela Final da Atividade com Confete
+        function showFinalScreen() {
+            const overlay = document.getElementById('feedback-overlay');
+            document.getElementById('fb-icon').innerHTML = "🏆";
+            document.getElementById('fb-title').innerText = "Atividade Concluída!";
+            document.getElementById('fb-text').innerHTML = "Ao concluir esta atividade, retome a ideia central das Unidades III e IV: o acolhimento individualizado precisa produzir informações úteis para a equipe. Quando preferências, aversões, barreiras, sinais de pausa e estratégias que funcionam são organizados em um plano breve, o cuidado deixa de depender do improviso e passa a ter mais continuidade.";
+            overlay.classList.add('active');
+            startConfetti();
+        }
+
+        // Reiniciar Atividade Completa
+        function restartActivity() {
+            correctCount = 0;
+            closeFeedback();
+            stopConfetti();
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const title = zone.querySelector('.zone-title');
+                zone.innerHTML = '';
+                zone.appendChild(title);
+            });
+            init();
+        }
+
+        // Mecanismo de Confetes Simples em Canvas 2D
+        let animationFrameId = null;
+        function startConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ['#0A2573', '#3296D4', '#E24A51', '#2ECC71', '#F1C40F'];
+            const pieces = [];
+            for (let i = 0; i < 120; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * canvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach((p, idx) => {
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+
+                    p.y += Math.cos(p.d) + 1 + p.r / 2;
+                    p.x += Math.sin(p.d) * 1;
+                    p.tilt = Math.sin(p.d * 10) * 4;
+
+                    if (p.y > canvas.height) {
+                        pieces[idx] = p;
+                        p.x = Math.random() * canvas.width;
+                        p.y = -20;
+                    }
+                });
+                animationFrameId = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function stopConfetti() {
+            const canvas = document.getElementById('confetti');
+            canvas.style.display = 'none';
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        // Inicialização automática ao carregar
+        window.onload = init;
+    </script>
+</body>
+</html>
